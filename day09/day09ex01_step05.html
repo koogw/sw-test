@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoList</title>
+    <style>
+        span.okTitle {
+            text-decoration: line-through;
+        }
+        .days {
+            display: flex;
+            justify-content: space-between;
+        }
+        .day {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 13%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>ToDoList</h1>
+    <p>
+        일정 추가: <input type="text" class="title">
+        <label><input type="checkbox" class="daySelect" value="monday"> 월</label>
+        <label><input type="checkbox" class="daySelect" value="tuesday"> 화</label>
+        <label><input type="checkbox" class="daySelect" value="wednesday"> 수</label>
+        <label><input type="checkbox" class="daySelect" value="thursday"> 목</label>
+        <label><input type="checkbox" class="daySelect" value="friday"> 금</label>
+        <label><input type="checkbox" class="daySelect" value="saturday"> 토</label>
+        <label><input type="checkbox" class="daySelect" value="sunday"> 일</label>
+        <button id="saveBtn">저장</button>
+    </p>
+    <div class="days">
+        <div id="monday" class="day">
+            <h2>월</h2>
+            <ul class="resultArea"></ul>
+        </div>
+        <div id="tuesday" class="day">
+            <h2>화</h2>
+            <ul class="resultArea"></ul>
+        </div>
+        <div id="wednesday" class="day">
+            <h2>수</h2>
+            <ul class="resultArea"></ul>
+        </div>
+        <div id="thursday" class="day">
+            <h2>목</h2>
+            <ul class="resultArea"></ul>
+        </div>
+        <div id="friday" class="day">
+            <h2>금</h2>
+            <ul class="resultArea"></ul>
+        </div>
+        <div id="saturday" class="day">
+            <h2>토</h2>
+            <ul class="resultArea"></ul>
+        </div>
+        <div id="sunday" class="day">
+            <h2>일</h2>
+            <ul class="resultArea"></ul>
+        </div>
+    </div>
+    <script>
+        var saveBtn = document.querySelector("#saveBtn");
+        var title = document.querySelector(".title");
+        var daySelects = document.querySelectorAll(".daySelect");
+        var todoList = {
+            monday: [],
+            tuesday: [],
+            wednesday: [],
+            thursday: [],
+            friday: [],
+            saturday: [],
+            sunday: []
+        };
+        var todoSeq = 105;
+        function myFindIdx(todoList, todo) {
+            var idx = todoList.findIndex(function(t) {
+                return t.no === todo.no;
+            });
+            return idx;
+        }
+        function drawList(day) {
+            var listArea = document.querySelector("#" + day + " .resultArea");
+            listArea.innerHTML = "";
+            todoList[day].forEach(function(todo) {
+                var liTag = document.createElement("li");
+                var checkBox = document.createElement("input");
+                var delBtn = document.createElement("button");
+                var spanTag = document.createElement("span");
+
+                liTag.style.listStyle = "none";
+                checkBox.setAttribute("type", "checkbox");
+                spanTag.setAttribute("class", "");
+                checkBox.removeAttribute("checked");
+                if (todo.done) {
+                    checkBox.setAttribute("checked", "checked");
+                    spanTag.setAttribute("class", "okTitle");
+                }
+                spanTag.innerHTML = todo.title + " ";
+                delBtn.innerText = "Delete";
+
+                delBtn.addEventListener('click', function(event) {
+                    var idx = myFindIdx(todoList[day], todo);
+                    if (idx != -1) {
+                        todoList[day].splice(idx, 1);
+                        drawList(day);
+                    }
+                });
+                checkBox.addEventListener('change', function(event) {
+                    var idx = myFindIdx(todoList[day], todo);
+                    if (idx != -1) {
+                        todoList[day][idx].done = !todoList[day][idx].done;
+                        drawList(day);
+                    }
+                });
+
+                liTag.appendChild(checkBox);
+                liTag.appendChild(spanTag);
+                liTag.appendChild(delBtn);
+                listArea.appendChild(liTag);
+            });
+        }
+        function append() {
+            var selectedDays = Array.from(daySelects).filter(input => input.checked).map(input => input.value);
+            selectedDays.forEach(function(day) {
+                todoList[day].push({
+                    no: todoSeq++,
+                    title: title.value,
+                    done: false
+                });
+                drawList(day);
+            });
+            title.value = "";
+            title.focus();
+        }
+        saveBtn.onclick = function() {
+            append();
+        }
+        title.onkeydown = function(e) {
+            if (e.keyCode === 13) {
+                append();
+            }
+        }
+    </script>
+</body>
+</html>
